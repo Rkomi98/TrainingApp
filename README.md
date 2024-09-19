@@ -1,61 +1,30 @@
-# TrainingApp
+# Training Monitor
 
-A useful application for tracking your team's training progress
+This is a web application for monitoring training exercises. Users can log their daily scores for various exercises and track their progress over time.
 
-Create a new React project
+## Features
 
-`npx create-react-app training-monitor
-cd training-monitor`
+- User authentication
+- Daily exercise logging
+- Progress tracking
+- Dashboard overview
 
-Install additional dependencies
+## Technologies Used
 
-`npm install react-router-dom chart.js react-chartjs-2`
+- React
+- React Router
+- Chart.js (for progress visualization)
+- GitHub Pages (for hosting)
 
-Remove unnecessary files
+## Setup and Deployment
 
-`rm src/logo.svg src/App.test.js src/reportWebVitals.js src/setupTests.js`
+This project was bootstrapped with Create React App and is deployed using GitHub Pages.
 
-Update src/index.js
+To run locally:
+1. Clone the repository
+2. Run `npm install` to install dependencies
+3. Run `npm start` to start the development server
 
-`echo "import React from 'react';`
-`import ReactDOM from 'react-dom/client';`
-`import './index.css';`
-`import App from './App';`
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);" > src/index.js `
-
-Update src/App.js
-
-`echo "import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import Login from './components/Login';
-import Dashboard from './components/Dashboard';
-import ExerciseLog from './components/ExerciseLog';
-import Progress from './components/Progress';
-
-function App() {
-  return (
-    <Router>
-      <div className="App">
-        <Switch>
-          <Route exact path="/" component={Login} />
-          <Route path="/dashboard" component={Dashboard} />
-          <Route path="/log" component={ExerciseLog} />
-          <Route path="/progress" component={Progress} />
-        </Switch>
-      </div>
-    </Router>
-  );
-}
-
-export default App;" > src/App.js`
-
-Create component files
-
-`mkdir src/components
-touch src/components/Login.js src/components/Dashboard.js src/components/ExerciseLog.js src/components/Progress.js`
+To deploy:
+1. Ensure your `package.json` has the correct `homepage` field
+2. Run `npm run deploy` to build and deploy to GitHub Pages
