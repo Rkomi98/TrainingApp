@@ -3,5 +3,8 @@
     "chart.js": "^4.4.4",
     "react-chartjs-2": "^5.2.0",
     "react-router-dom": "^6.26.2"
+  },
+  "devDependencies": {
+    "gh-pages": "^6.1.1"
   }
 }
