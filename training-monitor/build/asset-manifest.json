@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/TrainingApp/static/css/main.61238bf8.css",
-    "main.js": "/TrainingApp/static/js/main.5a0685b5.js",
+    "main.js": "/TrainingApp/static/js/main.83564ae6.js",
     "index.html": "/TrainingApp/index.html",
     "main.61238bf8.css.map": "/TrainingApp/static/css/main.61238bf8.css.map",
-    "main.5a0685b5.js.map": "/TrainingApp/static/js/main.5a0685b5.js.map"
+    "main.83564ae6.js.map": "/TrainingApp/static/js/main.83564ae6.js.map"
   },
   "entrypoints": [
     "static/css/main.61238bf8.css",
-    "static/js/main.5a0685b5.js"
+    "static/js/main.83564ae6.js"
   ]
 }
