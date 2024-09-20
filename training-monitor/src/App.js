@@ -1,22 +1,26 @@
-import React from 'react';
-import { Router, Route, Routes} from 'react-router-dom';
-import Login from './components/Login';
-import Dashboard from './components/Dashboard';
-import ExerciseLog from './components/ExerciseLog';
-import Progress from './components/Progress';
+import React, { useState } from 'react';
+import Form from './components/Form';
+import Scoreboard from './components/Scoreboard';
+import './App.css';
 
 function App() {
+  const [entries, setEntries] = useState([]);
+
+  const handleFormSubmit = (userName, score) => {
+    setEntries([...entries, { userName, score }]);
+  };
+
   return (
-    <Router>
-      <div className="App">
-        <Routes>
-          <Route exact path="/" component={Login} />
-          <Route path="/dashboard" component={Dashboard} />
-          <Route path="/log" component={ExerciseLog} />
-          <Route path="/progress" component={Progress} />
-        </Routes>
-      </div>
-    </Router>
+    <div className="App">
+      <header>
+        <h1>Training Monitor</h1>
+      </header>
+
+      <main>
+        <Form onSubmit={handleFormSubmit} />
+        <Scoreboard entries={entries} />
+      </main>
+    </div>
   );
 }
 
