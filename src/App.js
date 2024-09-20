@@ -2,18 +2,15 @@ import React, { useState } from 'react';
 import './App.css';
 
 function App() {
-  // State to store user input
   const [userName, setUserName] = useState('');
   const [score, setScore] = useState('');
   const [entries, setEntries] = useState([]);
 
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     if (userName && score) {
-      // Add new entry to the list
       setEntries([...entries, { userName, score }]);
-      setUserName(''); // Reset form
+      setUserName('');
       setScore('');
     }
   };
@@ -36,7 +33,6 @@ function App() {
         />
         <button type="submit">Submit</button>
       </form>
-      
       <div>
         <h2>Scoreboard</h2>
         <ul>
