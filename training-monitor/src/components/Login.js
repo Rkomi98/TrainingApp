@@ -1,41 +1,25 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
-function Login() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const history = useNavigate();
+function Login({ onLogin }) {
+  const [userName, setUserName] = useState('');
 
-  const handleLogin = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    // For this example, we'll use a simple check. In a real app, you'd want proper authentication.
-    if (username && password) {
-      localStorage.setItem('user', username);
-      history.push('/dashboard');
-    } else {
-      alert('Please enter both username and password');
+    if (userName) {
+      onLogin(userName);
     }
   };
 
   return (
-    <div>
-      <h2>Login</h2>
-      <form onSubmit={handleLogin}>
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button type="submit">Login</button>
-      </form>
-    </div>
+    <form onSubmit={handleSubmit} className="login-form">
+      <input
+        type="text"
+        placeholder="Enter your name"
+        value={userName}
+        onChange={(e) => setUserName(e.target.value)}
+      />
+      <button type="submit">Login</button>
+    </form>
   );
 }
 

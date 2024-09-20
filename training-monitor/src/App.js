@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import Form from './components/Form';
-import Scoreboard from './components/Scoreboard';
+import Login from './components/Login';
+import Exercises from './components/Exercises';
 import './App.css';
 
 function App() {
-  const [entries, setEntries] = useState([]);
+  const [userName, setUserName] = useState('');
 
-  const handleFormSubmit = (userName, score) => {
-    setEntries([...entries, { userName, score }]);
+  const handleLogin = (name) => {
+    setUserName(name);
   };
 
   return (
@@ -17,8 +17,11 @@ function App() {
       </header>
 
       <main>
-        <Form onSubmit={handleFormSubmit} />
-        <Scoreboard entries={entries} />
+        {userName ? (
+          <Exercises userName={userName} />
+        ) : (
+          <Login onLogin={handleLogin} />
+        )}
       </main>
     </div>
   );
