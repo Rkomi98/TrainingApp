@@ -28,8 +28,9 @@ function Exercises({ userName }) {
     setExerciseHistory(history);
   }, [userName]);
 
-  const handleScoreChange = (id, value) => {
-    setScores({ ...scores, [id]: value });
+  const handleScoreChange = (id, field, value) => {
+    const newScores = { ...scores, [id]: { ...scores[id], [field]: parseFloat(value) || '' } };
+    setScores(newScores);
   };
 
   const handleSubmit = (e) => {
@@ -56,7 +57,8 @@ function Exercises({ userName }) {
           <thead>
             <tr>
               <th>Exercise</th>
-              <th>Score</th>
+              <th>Score 1</th>
+              <th>Score 2</th>
             </tr>
           </thead>
           <tbody>
@@ -66,8 +68,18 @@ function Exercises({ userName }) {
                 <td>
                   <input
                     type="number"
-                    value={scores[exercise.id] || ''}
-                    onChange={(e) => handleScoreChange(exercise.id, e.target.value)}
+                    step="0.1"
+                    value={scores[exercise.id]?.score1 || ''}
+                    onChange={(e) => handleScoreChange(exercise.id, 'score1', e.target.value)}
+                    min="0"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={scores[exercise.id]?.score2 || ''}
+                    onChange={(e) => handleScoreChange(exercise.id, 'score2', e.target.value)}
                     min="0"
                   />
                 </td>

@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  LabelList,
+} from 'recharts';
 
 const ProgressChart = ({ history }) => {
   // Map exercise IDs to names
@@ -18,32 +27,26 @@ const ProgressChart = ({ history }) => {
     12: 'Dragon walk',
   };
 
-  // State to manage visibility of each exercise
-  const [visibleExercises, setVisibleExercises] = useState(Object.keys(exerciseMap));
+  const [selectedExercise, setSelectedExercise] = useState(1); // Default to the first exercise
 
-  // Prepare chart data
-  const chartData = history.map(entry => ({
-    date: entry.date,
-    ...entry.scores,
-  }));
+  // Prepare chart data filtered by selected exercise
+  const chartData = history.map(entry => {
+    const scores = {};
+    const exerciseId = selectedExercise; // Get the currently selected exercise ID
 
-  // Toggle visibility of exercises when legend is clicked
-  const handleLegendClick = (e) => {
-    const clickedExercise = e.dataKey;
-    setVisibleExercises(prevVisible => 
-      prevVisible.includes(clickedExercise)
-        ? prevVisible.filter(ex => ex !== clickedExercise)
-        : [...prevVisible, clickedExercise]
-    );
-  };
+    // Get the scores for the selected exercise
+    scores[`${exerciseId}-score1`] = entry.scores[exerciseId]?.score1 || null;
+    scores[`${exerciseId}-score2`] = entry.scores[exerciseId]?.score2 || null;
+    return { date: entry.date, ...scores };
+  });
 
   // Function to create labels for the end of each curve
-  const renderCustomLabel = (exerciseName) => ({ index, x, y }) => {
+  const renderCustomLabel = (exerciseName, scoreType) => ({ index, x, y }) => {
     const lastIndex = chartData.length - 1;
     if (index === lastIndex) {
       return (
         <text x={x + 5} y={y} fill="#000" fontSize={12} textAnchor="start">
-          {exerciseName}
+          {`${exerciseName} - ${scoreType}`}
         </text>
       );
     }
@@ -51,34 +54,52 @@ const ProgressChart = ({ history }) => {
   };
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <LineChart data={chartData}>
-        <XAxis dataKey="date" />
-        <YAxis />
-        <Tooltip />
-        <Legend
-          onClick={handleLegendClick}
-          formatter={(value) => exerciseMap[value]}
-        />
+    <div>
+      <h3>Select an Exercise</h3>
+      <select
+        value={selectedExercise}
+        onChange={(e) => setSelectedExercise(Number(e.target.value))}
+      >
+        {Object.keys(exerciseMap).map((id) => (
+          <option key={id} value={id}>
+            {exerciseMap[id]}
+          </option>
+        ))}
+      </select>
 
-        {/* Add lines for each exercise, but hide them using strokeOpacity when toggled off */}
-        {Object.keys(exerciseMap).map(id => (
+      <ResponsiveContainer width="100%" height={400}>
+        <LineChart data={chartData}>
+          <XAxis dataKey="date" />
+          <YAxis />
+          <Tooltip />
+          <Legend
+            formatter={(value) => {
+              const [exerciseId, scoreType] = value.split('-');
+              const exerciseName = exerciseMap[exerciseId];
+              return `${exerciseName} - ${scoreType.replace('score', 'Score ')}`;
+            }}
+          />
+
+          {/* Lines for selected exercise scores */}
           <Line
-            key={id}
             type="monotone"
-            dataKey={id}
-            stroke={`#${Math.floor(Math.random() * 16777215).toString(16)}`}
-            strokeOpacity={visibleExercises.includes(id) ? 1 : 0}  // Hide the line by setting strokeOpacity to 0
+            dataKey={`${selectedExercise}-score1`}
+            stroke="#8884d8"
             activeDot={{ r: 8 }}
           >
-            {/* Add label at the end of the curve if visible */}
-            {visibleExercises.includes(id) && (
-              <LabelList dataKey={id} content={renderCustomLabel(exerciseMap[id])} />
-            )}
+            <LabelList dataKey={`${selectedExercise}-score1`} content={renderCustomLabel(exerciseMap[selectedExercise], 'Score 1')} />
           </Line>
-        ))}
-      </LineChart>
-    </ResponsiveContainer>
+          <Line
+            type="monotone"
+            dataKey={`${selectedExercise}-score2`}
+            stroke="#82ca9d"
+            activeDot={{ r: 8 }}
+          >
+            <LabelList dataKey={`${selectedExercise}-score2`} content={renderCustomLabel(exerciseMap[selectedExercise], 'Score 2')} />
+          </Line>
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
   );
 };
 
