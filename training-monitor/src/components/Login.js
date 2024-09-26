@@ -11,15 +11,17 @@ function Login({ onLogin }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="login-form">
-      <input
-        type="text"
-        placeholder="Enter your name"
-        value={userName}
-        onChange={(e) => setUserName(e.target.value)}
-      />
-      <button type="submit">Login</button>
-    </form>
+    <div className="login-container">
+      <form onSubmit={handleSubmit} className="login-form">
+        <input
+          type="text"
+          placeholder="Enter your name"
+          value={userName}
+          onChange={(e) => setUserName(e.target.value)}
+        />
+        <button type="submit">Login</button>
+      </form>
+    </div>
   );
 }
 
