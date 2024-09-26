@@ -1,3 +1,22 @@
 
 /node_modules
 /node_modules/.bin
+# Node.js / Express.js
+/node_modules
+/package-lock.json
+/npm-debug.log
+/yarn-error.log
+# React / Front-End
+/client/node_modules
+/client/build
+/client/.env
+/client/package-lock.json
+/client/npm-debug.log
+# Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+
