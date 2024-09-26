@@ -53,6 +53,10 @@ const ProgressChart = ({ history }) => {
     return null;
   };
 
+  // Calculate the maximum value to set y-axis limits
+  const maxValue = Math.max(...chartData.flatMap(entry => Object.values(entry).slice(1))); // Skip the date field
+  const yMax = maxValue + 0.5;
+
   return (
     <div>
       <h3>Select an Exercise</h3>
@@ -70,7 +74,7 @@ const ProgressChart = ({ history }) => {
       <ResponsiveContainer width="100%" height={400}>
         <LineChart data={chartData}>
           <XAxis dataKey="date" />
-          <YAxis />
+          <YAxis domain={[0, yMax]} />
           <Tooltip />
           <Legend
             formatter={(value) => {

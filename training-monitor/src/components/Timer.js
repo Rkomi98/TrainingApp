@@ -1,45 +1,41 @@
-// src/components/Timer.js
-import React, { useState, useEffect } from 'react';
+// src/Timer.js
+import React, { useEffect, useState } from 'react';
 
 const Timer = () => {
-  const [seconds, setSeconds] = useState(0);
-  const [isActive, setIsActive] = useState(false);
+  const [time, setTime] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
 
   useEffect(() => {
-    let interval = null;
-
-    if (isActive) {
-      interval = setInterval(() => {
-        setSeconds((prev) => prev + 1);
+    let timerId;
+    if (isRunning) {
+      timerId = setInterval(() => {
+        setTime(prevTime => prevTime + 1);
       }, 1000);
-    } else if (!isActive && seconds !== 0) {
-      clearInterval(interval);
     }
+    return () => clearInterval(timerId);
+  }, [isRunning]);
 
-    return () => clearInterval(interval);
-  }, [isActive, seconds]);
-
-  const toggle = () => {
-    setIsActive(!isActive);
+  const handleStart = () => setIsRunning(true);
+  const handlePause = () => setIsRunning(false);
+  const handleStop = () => {
+    setIsRunning(false);
+    setTime(0);
   };
 
-  const reset = () => {
-    setIsActive(false);
-    setSeconds(0);
-  };
-
-  const formatTime = () => {
-    const mins = Math.floor(seconds / 60);
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
 
   return (
-    <div style={{ marginBottom: '20px' }}>
-      <h3>Timer</h3>
-      <div>{formatTime()}</div>
-      <button onClick={toggle}>{isActive ? 'Pause' : 'Start'}</button>
-      <button onClick={reset}>Reset</button>
+    <div className="timer">
+      <div className="timer-display">{formatTime(time)}</div>
+      <div className="timer-controls">
+        <button onClick={handleStart}>Start</button>
+        <button onClick={handlePause}>Pause</button>
+        <button onClick={handleStop}>Stop</button>
+      </div>
     </div>
   );
 };

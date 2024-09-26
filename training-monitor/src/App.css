@@ -1,47 +1,161 @@
-.login-form,
-.score-form {
+/* src/App.css */
+
+/* Basic Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f4f9; /* Light gray background */
+  color: #333; /* Dark text */
+}
+
+/* Main Container */
+.container {
+  max-width: 800px;
+  margin: 20px auto; /* Center the container */
+  padding: 20px;
+  border-radius: 8px;
+  background: white; /* White background for content */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Soft shadow */
+}
+
+/* Headings */
+h1, h2, h3 {
+  margin: 20px; /* Add margin to all headings */
+  
+  color: #2c3e50; /* Darker color for headers */
+}
+
+
+/* Timer */
+.timer {
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* Stack items vertically */
+  justify-content: center;
   align-items: center;
+  margin: 20px;
+  background: #3498db; /* Blue background for timer */
+  padding: 20px;
+  border-radius: 8px;
+  padding: 10px; 
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  font-size: 2em; /* Larger font size */
+  color: white; /* White text */
+  position: relative;
 }
 
-.login-form input,
-.score-form input {
-  padding: 10px;
-  margin: 10px 0;
-  font-size: 16px;
-  width: 100%;
-  max-width: 300px;
+.timer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.2); /* Subtle white overlay */
+  border-radius: 50%;
+  transform: translateX(-50%);
+  animation: pulse 2s infinite; /* Pulse effect */
 }
 
-.login-form button,
-.score-form button {
-  padding: 10px 20px;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+/* Timer Controls */
+.timer-controls {
+  margin-top: 10px;
 }
 
-.login-form button:hover,
-.score-form button:hover {
-  background-color: #218838;
+.timer-controls button {
+  background-color: #2980b9; /* Darker blue for controls */
+  margin-right: 10px; /* Spacing between buttons */
 }
 
+@keyframes pulse {
+  0% {
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.1);
+  }
+  100% {
+    transform: translateX(-50%) scale(1);
+  }
+}
+
+/* Table Styles */
 table {
-  margin: 20px auto;
-  border-collapse: collapse;
-  width: 80%;
-  max-width: 600px;
+  width: 100%;
+  border-collapse: collapse; /* Merge borders */
+  margin-bottom: 20px;
 }
 
-th, td {
-  border: 1px solid #ddd;
-  padding: 8px;
+th,
+td {
+  padding: 12px;
   text-align: left;
+  border-bottom: 1px solid #ddd; /* Light gray border for rows */
 }
 
 th {
-  background-color: #f2f2f2;
+  background: #3498db; /* Blue header */
+  color: white;
+}
+
+tbody tr:hover {
+  background-color: #f1f1f1; /* Highlight on hover */
+}
+
+/* Input Fields */
+input[type="number"] {
+  width: 100%; /* Full width */
+  padding: 8px;
+  border: 1px solid #ccc; /* Light gray border */
+  border-radius: 4px;
+  transition: border 0.2s;
+}
+
+input[type="number"]:focus {
+  border: 1px solid #3498db; /* Highlight border on focus */
+  outline: none; /* Remove outline */
+}
+
+/* Buttons */
+button {
+  background-color: #3498db; /* Blue button */
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+button:hover {
+  background-color: #2980b9; /* Darker blue on hover */
+  transform: translateY(-2px); /* Slight lift effect */
+}
+
+/* Progress Chart */
+.chart-container {
+  margin-top: 20px;
+  padding: 10px;
+  background: #ecf0f1; /* Light background for chart */
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .container {
+    padding: 15px; /* Less padding on small screens */
+  }
+
+  h2 {
+    font-size: 1.5em; /* Smaller header */
+  }
+
+  .timer {
+    font-size: 1.5em; /* Smaller font size for timer on mobile */
+  }
 }

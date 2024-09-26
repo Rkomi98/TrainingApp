@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ProgressTable from './ProgressTable';
 import ProgressChart from './ProgressChart';
+import Timer from './Timer';
 
 function Exercises({ userName }) {
   const [scores, setScores] = useState({});
@@ -52,6 +53,7 @@ function Exercises({ userName }) {
   return (
     <div>
       <h2>Exercises for Today</h2>
+      <Timer />
       <form onSubmit={handleSubmit}>
         <table>
           <thead>
