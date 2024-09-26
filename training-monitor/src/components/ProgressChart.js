@@ -4,14 +4,14 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, La
 const ProgressChart = ({ history }) => {
   // Map exercise IDs to names
   const exerciseMap = {
-    1: 'Addominali (retto)',
+    1: 'Addominali (Jacknife)',
     2: 'Stabilizzazioni di bacino',
-    3: 'Addominali tenute isometriche (plance)',
-    4: 'Tenute laterali',
+    3: 'Addominali tenute isometriche (elbow plank)',
+    4: 'Tenute laterali (side plank)',
     5: 'Squat profondo con mani dietro il capo',
-    6: 'Piston squat su rialzo',
+    6: 'Pistol squat su rialzo',
     7: 'Affondo frontale sul posto',
-    8: 'RDL una gamba',
+    8: 'Romanian Deadlift una gamba',
     9: 'Piegamenti sulle braccia',
     10: 'Piegamento mono podalico con piede posteriore in appoggio',
     11: 'Cammina sulle mani all’indietro',

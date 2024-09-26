@@ -7,14 +7,14 @@ function Exercises({ userName }) {
   const [exerciseHistory, setExerciseHistory] = useState([]);
 
   const exercises = [
-    { id: 1, name: 'Addominali (retto)' },
+    { id: 1, name: 'Addominali (Jacknife)' },
     { id: 2, name: 'Stabilizzazioni di bacino' },
-    { id: 3, name: 'Addominali tenute isometriche (plance)' },
-    { id: 4, name: 'Tenute laterali' },
+    { id: 3, name: 'Addominali tenute isometriche (elbow plank)' },
+    { id: 4, name: 'Tenute laterali (side plank)' },
     { id: 5, name: 'Squat profondo con mani dietro il capo' },
-    { id: 6, name: 'Piston squat su rialzo' },
+    { id: 6, name: 'Pistol squat su rialzo' },
     { id: 7, name: 'Affondo frontale sul posto' },
-    { id: 8, name: 'RDL una gamba' },
+    { id: 8, name: 'Romanian Deadlift una gamba' },
     { id: 9, name: 'Piegamenti sulle braccia' },
     { id: 10, name: 'Piegamento mono podalico con piede posteriore in appoggio' },
     { id: 11, name: 'Cammina sulle mani all’indietro' },
