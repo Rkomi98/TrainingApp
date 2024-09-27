@@ -1,24 +1,28 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Login from './components/Login';
+import Dashboard from './components/Dashboard';
+import NotFound from './components/NotFound';  // Ensure this import exists
 
 function App() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const loggedUser = localStorage.getItem('user');
+    if (loggedUser) {
+      setUser(JSON.parse(loggedUser));
+    }
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={user ? <Dashboard user={user} setUser={setUser} /> : <Login setUser={setUser} />} />
+          <Route path="*" element={<NotFound />} />  {/* Ensure this route exists */}
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
