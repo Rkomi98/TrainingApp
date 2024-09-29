@@ -1,68 +1,45 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
 const authRoutes = require('./routes/auth');  // Import the authentication routes
 const exerciseRoutes = require('./routes/exercises'); // Import exercise management routes
 const app = express();
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
+// Middleware
 app.use(express.json()); // for parsing application/json
+app.use(cors({ origin: 'http://localhost:3000', methods: ['GET', 'POST'] }));
 
+const MONGO_URI= 'mongodb+srv://Rkomi98:JKwQrVZEoEEM5sul@cluster0.2dvmw.mongodb.net/trainingApp?retryWrites=true&w=majority&appName=Cluster0'
 // Connect to MongoDB
-mongoose.connect('your-mongodb-connection-string', { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.log(err));
+mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log('MongoDB connected'))
+    .catch(err => console.log(err));
 
-// Example routes for user registration and login
-app.post('/register', async (req, res) => {
-  const { username, password, role } = req.body;
+// Routes for authentication
+app.use('/api/auth', authRoutes);
 
-  // Hash the password
-  const hashedPassword = await bcrypt.hash(password, 10);
+// Routes for exercise management (protected routes)
+app.use('/api/exercises', authenticateJWT, exerciseRoutes);
 
-  // Create new user
-  const user = new User({ username, password: hashedPassword, role });
+// Middleware to protect routes with JWT
+function authenticateJWT(req, res, next) {
+    const token = req.headers.authorization;
 
-  await user.save();
+    if (!token) {
+        return res.sendStatus(403);
+    }
 
-  res.status(201).send('User registered successfully');
-});
-
-app.post('/login', async (req, res) => {
-  const { username, password } = req.body;
-
-  // Find user by username
-  const user = await User.findOne({ username });
-
-  if (!user) return res.status(400).send('User not found');
-
-  // Compare passwords
-  const isMatch = await bcrypt.compare(password, user.password);
-
-  if (!isMatch) return res.status(400).send('Invalid credentials');
-
-  // Generate JWT token
-  const token = jwt.sign({ id: user._id, role: user.role }, 'your-jwt-secret');
-
-  res.json({ token });
-});
-
-// Middleware to protect routes
-const authenticateJWT = (req, res, next) => {
-  const token = req.headers.authorization;
-
-  if (!token) return res.sendStatus(403);
-
-  jwt.verify(token, 'your-jwt-secret', (err, user) => {
-    if (err) return res.sendStatus(403);
-
-    req.user = user;  // Add user info to request object
-    next();
-  });
-};
-
-// Protected route example
-app.get('/profile', authenticateJWT, (req, res) => {
-  res.send(`Welcome, ${req.user.id}!`);
-});
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (err) {
+            return res.sendStatus(403);
+        }
+        req.user = user; // Add user info to request object
+        next();
+    });
+}
 
 // Start server
-app.listen(5000, () => console.log('Server running on port 5000'));
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
