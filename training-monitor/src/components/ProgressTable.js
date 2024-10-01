@@ -1,21 +1,13 @@
 import React from 'react';
 
-const exercises = {
-  1: 'Addominali (Jacknife)',
-  2: 'Stabilizzazioni di bacino',
-  3: 'Addominali tenute isometriche (elbow plank)',
-  4: 'Tenute laterali (side plank)',
-  5: 'Squat profondo con mani dietro il capo',
-  6: 'Pistol squat su rialzo',
-  7: 'Affondo frontale sul posto',
-  8: 'Romanian Deadlift una gamba',
-  9: 'Piegamenti sulle braccia',
-  10: 'Piegamento mono podalico con piede posteriore in appoggio',
-  11: 'Cammina sulle mani all’indietro',
-  12: 'Dragon walk',
-};
+// Retrieve schedule for this user. If no data is found online for that user: "No data pigrone" has to be shown
 
-const ProgressTable = ({ history }) => {
+const ProgressTable = ({ history, exercises }) => {
+  // Check if exercises data is available
+  if (!exercises || exercises.length === 0) {
+    return <div>No data pigrone</div>;
+  }
+
   return (
     <table>
       <thead>
@@ -29,7 +21,7 @@ const ProgressTable = ({ history }) => {
       <tbody>
         {Object.keys(exercises).map((exerciseId) => (
           <tr key={exerciseId}>
-            <td>{exercises[exerciseId]}</td>
+            <td>{exercises[exerciseId].name}</td>
             {history.map((entry) => (
               <td key={entry.date}>
                 {entry.scores[exerciseId]?.score1 || 'N/A'} / {entry.scores[exerciseId]?.score2 || 'N/A'}
@@ -43,3 +35,4 @@ const ProgressTable = ({ history }) => {
 };
 
 export default ProgressTable;
+

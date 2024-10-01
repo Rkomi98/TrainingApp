@@ -1,67 +1,66 @@
-// In your server's exerciseRoutes.js file
 const express = require('express');
 const router = express.Router();
-const Exercise = require('../models/Exercise'); // Adjust the path according to your project structure
-const jwt = require('jsonwebtoken');
+const Schedule = require('../models/Schedule');  // Import the Schedule model
 
-// Middleware to protect routes with JWT
-function authenticateJWT(req, res, next) {
-  const token = req.headers.authorization;
+// Get all exercises from the schedule
+router.get('/', async (req, res) => {
+  try {
+    const schedule = await Schedule.findOne();  // Retrieve the schedule document
 
-  if (!token) {
-    return res.sendStatus(403); // Forbidden if no token is present
-  }
-
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) {
-      return res.sendStatus(403); // Forbidden if token is invalid
+    if (!schedule) {
+      return res.status(404).json({ message: 'No schedule found' });
     }
-    req.user = user; // Add user info to request object
-    next(); // Proceed to the next middleware or route handler
-  });
-}
-// GET all exercises (protected route)
-router.get('/', authenticateJWT, async (req, res) => {
-  try {
-    const exercises = await Exercise.find(); // Fetch all exercises
-    res.json(exercises); // Send as JSON response
+
+    // Return the exercises array
+    res.json(schedule.exercises);
   } catch (error) {
-    res.status(500).json({ message: 'Server error fetching exercises.' });
+    console.error("Error fetching exercises:", error);  // Log the error
+    res.status(500).json({ message: 'Server error while fetching exercises' });
   }
 });
 
-// Add a new exercise (only for coaches)
-router.post('/', authenticateJWT, async (req, res) => {
-  // Ensure the user is a coach
-  if (req.user.role !== 'coach') {
-      return res.status(403).send('Access denied');
-  }
-
-  const { name } = req.body;
-  const newExercise = new Exercise({ name });
-
+// POST route to receive and save scores
+router.post('/scores', async (req, res) => {
   try {
-      await newExercise.save();
-      res.status(201).json(newExercise);
+    const { userName, scores, date } = req.body;
+
+    // Check if the user's schedule exists
+    let schedule = await Schedule.findOne({ player: userName });
+
+    if (!schedule) {
+      // Create a new schedule if it doesn't exist
+      schedule = new Schedule({
+        coach: 'Coach123', // Assign a coach or make this dynamic
+        player: userName,
+        exercises: Object.entries(scores).map(([id, scoreData]) => ({
+          id: parseInt(id), // Convert to int if needed
+          score1: scoreData.score1,
+          score2: scoreData.score2,
+        })),
+        createdBy: 'Coach123', // Assign a creator or make this dynamic
+        createdAt: new Date(),
+        date: date || new Date(), // Use provided date or current date
+      });
+    } else {
+      // Update existing schedule
+      schedule.exercises.forEach((exercise) => {
+        if (scores[exercise.id]) {
+          exercise.score1 = scores[exercise.id].score1;
+          exercise.score2 = scores[exercise.id].score2;
+        }
+      });
+    }
+
+    // Save the schedule (either new or updated)
+    await schedule.save();
+
+    res.json({ message: 'Scores saved successfully', schedule });
   } catch (error) {
-      res.status(400).send('Error adding exercise');
+    console.error('Error saving scores:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Delete an exercise (only for coaches)
-router.delete('/:id', authenticateJWT, async (req, res) => {
-  // Ensure the user is a coach
-  if (req.user.role !== 'coach') {
-      return res.status(403).send('Access denied');
-  }
-
-  try {
-      const exercise = await Exercise.findByIdAndRemove(req.params.id);
-      if (!exercise) return res.status(404).send('Exercise not found');
-      res.send('Exercise deleted successfully');
-  } catch (error) {
-      res.status(500).send('Error deleting exercise');
-  }
-});
+module.exports = router;
 
 module.exports = router;

@@ -1,29 +1,9 @@
 const mongoose = require('mongoose');
 
-const ExerciseSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  description: String,
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  },
-  results: [
-    {
-      user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-      },
-      score: Number,
-      date: {
-        type: Date,
-        default: Date.now,
-      },
-    },
-  ],
+// Define the schema for the exercises
+const exerciseSchema = new mongoose.Schema({
+  id: Number,
+  name: String
 });
 
-module.exports = mongoose.model('Exercise', ExerciseSchema);
+module.exports = exerciseSchema; // Export the schema, not the model

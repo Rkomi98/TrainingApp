@@ -10,24 +10,22 @@ import {
   LabelList,
 } from 'recharts';
 
-const ProgressChart = ({ history }) => {
-  // Map exercise IDs to names
-  const exerciseMap = {
-    1: 'Addominali (Jacknife)',
-    2: 'Stabilizzazioni di bacino',
-    3: 'Addominali tenute isometriche (elbow plank)',
-    4: 'Tenute laterali (side plank)',
-    5: 'Squat profondo con mani dietro il capo',
-    6: 'Pistol squat su rialzo',
-    7: 'Affondo frontale sul posto',
-    8: 'Romanian Deadlift una gamba',
-    9: 'Piegamenti sulle braccia',
-    10: 'Piegamento mono podalico con piede posteriore in appoggio',
-    11: 'Cammina sulle mani all’indietro',
-    12: 'Dragon walk',
-  };
+const ProgressChart = ({ history, exercises }) => {
+  // Create exerciseMap without using Object.fromEntries
+  const exerciseMap = {};
+  
+  if (exercises && Object.keys(exercises).length > 0) {
+    Object.keys(exercises).forEach((id) => {
+      exerciseMap[id] = exercises[id].name;
+    });
+  }
 
-  const [selectedExercise, setSelectedExercise] = useState(1); // Default to the first exercise
+  const [selectedExercise, setSelectedExercise] = useState(Object.keys(exerciseMap)[0] || null); // Default to the first exercise or null
+
+  // Check if exercises data is available
+  if (!exercises || Object.keys(exerciseMap).length === 0) {
+    return <div>No data pigrone</div>;
+  }
 
   // Prepare chart data filtered by selected exercise
   const chartData = history.map(entry => {
