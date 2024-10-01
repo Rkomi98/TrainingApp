@@ -1,19 +1,17 @@
 const mongoose = require('mongoose');
 
-// Import the Exercise schema
-const exerciseSchema = require('./Exercise');
-
-// Define the Schedule schema
-const scheduleSchema = new mongoose.Schema({
-  coach: { type: String, required: true },
-  player: { type: String, required: true },
-  exercises: [exerciseSchema], // Embed the Exercise schema here
-  createdBy: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now },
-  date: { type: Date, required: true } // Add the date field
+const exerciseSchema = new mongoose.Schema({
+  id: Number,
+  score1: Number,
+  score2: Number
 });
 
-// Create the model
-const Schedule = mongoose.model('Schedule', scheduleSchema);
+const scheduleSchema = new mongoose.Schema({
+  player: String,
+  coach: String,
+  exercises: [exerciseSchema],
+  createdAt: { type: Date, default: Date.now },
+  date: { type: Date, default: Date.now }
+});
 
-module.exports = Schedule;  // Export the Schedule model
+module.exports = mongoose.model('Schedule', scheduleSchema);

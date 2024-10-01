@@ -16,10 +16,18 @@ function Exercises({ userName }) {
     const fetchExercises = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:5000/api/exercises', {
-          headers: { Authorization: `Bearer ${token}` }
+        const response = await fetch('http://localhost:5000/api/exercises', {
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include' // This line is important for CORS with credentials
         });
-        setExercises(response.data); // Set the exercises from the API
+        if (!response.ok) {
+          throw new Error('Failed to fetch exercises');
+        }
+        const data = await response.json();
+        setExercises(data);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching exercises:', err);
@@ -50,39 +58,60 @@ function Exercises({ userName }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    const newHistory = { date: new Date().toLocaleDateString(), scores };
-  
     try {
-      const response = await fetch('http://localhost:5000/api/exercises/scores', {
-        method: 'POST',
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+  
+      console.log('Submitting scores for user:', userName);
+      console.log('Scores to submit:', scores);
+  
+      const scoresArray = Object.entries(scores).map(([id, score]) => ({
+        id: Number(id),
+        score1: score.score1,
+        score2: score.score2,
+      }));
+  
+      console.log('Formatted scores array:', scoresArray);
+  
+      const response = await fetch(`http://localhost:5000/api/schedule/${userName}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`, // Assuming you're using JWT for auth
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          userName,
-          scores,
-          date: new Date().toISOString(), // Optional: Include a date in a standard format
-        }),
+        credentials: 'include',
+        body: JSON.stringify({ scores: scoresArray }),
       });
   
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Scores submitted successfully:', data);
+      console.log('Response status:', response.status);
+      const responseData = await response.json();
+      console.log('Response data:', responseData);
   
-        // Update local history after successful submission
-        const updatedHistory = [...exerciseHistory, newHistory];
-        setExerciseHistory(updatedHistory);
-  
-        // Clear scores after submission
-        setScores({});
-      } else {
-        console.error('Failed to submit scores:', response.statusText);
+      if (!response.ok) {
+        throw new Error(`Failed to update schedule: ${responseData.message || 'Unknown error'}`);
       }
+  
+      console.log('Schedule updated successfully:', responseData);
+
+      // Update local storage
+      localStorage.setItem(userName, JSON.stringify(scores));
+      const history = JSON.parse(localStorage.getItem(`${userName}-history`)) || [];
+      history.push({ date: new Date(), scores });
+      localStorage.setItem(`${userName}-history`, JSON.stringify(history));
+
+      // Update state
+      setExerciseHistory(history);
+
+      alert('Scores submitted successfully!');
     } catch (error) {
-      console.error('An error occurred while submitting the scores:', error);
+      console.error('Detailed error:', error);
+      alert(`Failed to submit scores. Error: ${error.message}`);
     }
   };
+
+
 
   // Show a loading indicator or error if necessary
   if (loading) return <p>Loading exercises...</p>;

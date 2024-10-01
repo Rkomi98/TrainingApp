@@ -1,12 +1,24 @@
 import React from 'react';
 
-// Retrieve schedule for this user. If no data is found online for that user: "No data pigrone" has to be shown
-
-const ProgressTable = ({ history, exercises }) => {
-  // Check if exercises data is available
-  if (!exercises || exercises.length === 0) {
-    return <div>No data pigrone</div>;
+const formatDate = (date) => {
+  if (!(date instanceof Date)) {
+    date = new Date(date);
   }
+  return date.toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric' 
+  });
+};
+
+const ProgressTable = ({ history }) => {
+  // Check if history is provided and contains data
+  if (!history || history.length === 0) {
+    return <div>No progress recorded yet</div>;
+  }
+
+  // Get the exercises from the first entry
+  const exercises = history[0].exercises || [];
 
   return (
     <table>
@@ -14,19 +26,23 @@ const ProgressTable = ({ history, exercises }) => {
         <tr>
           <th>Exercise</th>
           {history.map((entry) => (
-            <th key={entry.date}>{entry.date}</th>
+            <th key={entry.date}>{formatDate(entry.date)}</th>
           ))}
         </tr>
       </thead>
       <tbody>
-        {Object.keys(exercises).map((exerciseId) => (
-          <tr key={exerciseId}>
-            <td>{exercises[exerciseId].name}</td>
-            {history.map((entry) => (
-              <td key={entry.date}>
-                {entry.scores[exerciseId]?.score1 || 'N/A'} / {entry.scores[exerciseId]?.score2 || 'N/A'}
-              </td>
-            ))}
+        {exercises.map((exercise) => (
+          <tr key={exercise.id}>
+            <td>{exercise.name}</td>
+            {history.map((entry) => {
+              // Find the exercise entry for the current exercise in the current history entry
+              const exerciseEntry = entry.exercises.find(e => e.id === exercise.id);
+              return (
+                <td key={entry.date}>
+                  {exerciseEntry ? `${exerciseEntry.score1 || 'N/A'} / ${exerciseEntry.score2 || 'N/A'}` : 'N/A'}
+                </td>
+              );
+            })}
           </tr>
         ))}
       </tbody>
@@ -35,4 +51,3 @@ const ProgressTable = ({ history, exercises }) => {
 };
 
 export default ProgressTable;
-

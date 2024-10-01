@@ -61,6 +61,46 @@ router.post('/scores', async (req, res) => {
   }
 });
 
-module.exports = router;
+router.put('/api/schedule/:player', async (req, res) => {
+  const { player } = req.params;
+  const { scores } = req.body;
+
+  console.log('Received update request for player:', player);
+  console.log('Received scores:', scores);
+
+  try {
+    if (!Array.isArray(scores)) {
+      console.error('Invalid scores format. Expected an array.');
+      return res.status(400).json({ message: 'Invalid scores format. Expected an array.' });
+    }
+
+    let schedule = await Schedule.findOne({ player });
+    console.log('Existing schedule:', schedule);
+
+    if (!schedule) {
+      console.log('Creating new schedule for player:', player);
+      schedule = new Schedule({
+        player,
+        coach: 'Coach123',
+        exercises: scores,
+        createdAt: new Date(),
+        date: new Date()
+      });
+    } else {
+      console.log('Updating existing schedule for player:', player);
+      schedule.exercises = scores;
+      schedule.date = new Date();
+    }
+
+    console.log('Saving schedule:', schedule);
+    const updatedSchedule = await schedule.save();
+    console.log('Schedule saved successfully:', updatedSchedule);
+
+    res.status(200).json(updatedSchedule);
+  } catch (error) {
+    console.error('Error updating schedule:', error);
+    res.status(500).json({ message: 'Server error', error: error.toString(), stack: error.stack });
+  }
+});
 
 module.exports = router;

@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');  // Import the authentication routes
 const exerciseRoutes = require('./routes/exercises'); // Import exercise management routes
+const Schedule = require('./models/Schedule');  // Make sure this path is correct
 const app = express();
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
@@ -13,7 +14,8 @@ app.use(express.json()); // for parsing application/json
 app.use(cors({
   origin: 'http://192.168.1.107:3000',//'http://localhost:3000',  // Frontend domain
   methods: ['GET', 'POST', 'PUT', 'DELETE'],  // Allowed methods
-  credentials: true  // If your requests include cookies or HTTP authentication
+  credentials: true,  // If your requests include cookies or HTTP authentication
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 const MONGO_URI= 'mongodb+srv://Rkomi98:JKwQrVZEoEEM5sul@cluster0.2dvmw.mongodb.net/trainingApp?retryWrites=true&w=majority&appName=Cluster0'
@@ -47,56 +49,66 @@ function authenticateJWT(req, res, next) {
   });
 }
 
-app.get('/api/schedule/:player', async (req, res) => {
+
+// Schedule routes
+app.get('/api/schedule/:player', authenticateJWT, async (req, res) => {
+  const { player } = req.params;
   try {
-    const { player } = req.params;
     const schedule = await Schedule.findOne({ player });
+    if (!schedule) {
+      return res.status(404).json({ message: 'No schedule found for this user' });
+    }
+    res.status(200).json(schedule);
+  } catch (error) {
+    console.error('Error fetching schedule:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+app.put('/api/schedule/:player', authenticateJWT, async (req, res) => {
+  const { player } = req.params;
+  const { scores } = req.body;
+
+  console.log('Received update request for player:', player);
+  console.log('Received scores:', scores);
+
+  try {
+    if (!Array.isArray(scores)) {
+      console.error('Invalid scores format. Expected an array.');
+      return res.status(400).json({ message: 'Invalid scores format. Expected an array.' });
+    }
+
+    let schedule = await Schedule.findOne({ player });
+    console.log('Existing schedule:', schedule);
 
     if (!schedule) {
-      return res.status(404).json({ message: 'No schedule found' });
-    }
-
-    // Transform the data if necessary
-    const responseData = {
-      _id: schedule._id,
-      player: schedule.player,
-      coach: schedule.coach,
-      exercises: schedule.exercises.map(exercise => ({
-        id: exercise.id, // This will be a number
-        // Include other fields if necessary
-      })),
-      createdAt: schedule.createdAt,
-    };
-
-    return res.status(200).json(responseData);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Server error' });
-  }
-});
-
-
-app.post('/api/schedule', async (req, res) => {
-  try {
-    const { player, coach, exercises } = req.body; // Destructure incoming data
-    const existingSchedule = await Schedule.findOne({ player, coach });
-
-    if (existingSchedule) {
-      // Update existing schedule
-      existingSchedule.exercises.push(...exercises);
-      await existingSchedule.save();
-      return res.status(200).json(existingSchedule);
+      console.log('Creating new schedule for player:', player);
+      schedule = new Schedule({
+        player,
+        coach: 'Coach123',
+        exercises: scores,
+        createdAt: new Date(),
+        date: new Date()
+      });
     } else {
-      // Create new schedule
-      const newSchedule = new Schedule({ player, coach, exercises });
-      await newSchedule.save();
-      return res.status(201).json(newSchedule);
+      console.log('Updating existing schedule for player:', player);
+      schedule.exercises = scores;
+      schedule.date = new Date();
     }
+
+    console.log('Saving schedule:', schedule);
+    const updatedSchedule = await schedule.save();
+    console.log('Schedule saved successfully:', updatedSchedule);
+
+    res.status(200).json(updatedSchedule);
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Server error' });
+    console.error('Error updating schedule:', error);
+    res.status(500).json({ message: 'Server error', error: error.toString(), stack: error.stack });
   }
 });
+
+
+
 
 // Start server
 const PORT = process.env.PORT || 5000;
