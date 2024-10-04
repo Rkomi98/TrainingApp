@@ -13,37 +13,91 @@ function Exercises({ userName }) {
 
   // Fetch exercises from the backend when the component mounts
   useEffect(() => {
-    const fetchExercises = async () => {
+    const fetchData = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:5000/api/exercises', {
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
+    
+        // Fetch exercises
+        const exercisesResponse = await fetch('http://localhost:5000/api/exercises', {
           headers: { 
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
-          credentials: 'include' // This line is important for CORS with credentials
+          credentials: 'include'
         });
-        if (!response.ok) {
+        if (!exercisesResponse.ok) {
           throw new Error('Failed to fetch exercises');
         }
-        const data = await response.json();
-        setExercises(data);
+        const exercisesData = await exercisesResponse.json();
+        setExercises(exercisesData);
+    
+        // Fetch history from server
+        const historyResponse = await fetch(`http://localhost:5000/api/schedule/${userName}`, {
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        });
+        
+        let serverHistory = [];
+        if (historyResponse.status === 404) {
+          console.log('No history found for new user');
+        } else if (!historyResponse.ok) {
+          throw new Error('Failed to fetch history from server');
+        } else {
+          serverHistory = await historyResponse.json();
+        }
+    
+        // Ensure serverHistory is an array
+        if (!Array.isArray(serverHistory)) {
+          console.warn('Server history is not an array, using empty array instead');
+          serverHistory = [];
+        }
+    
+        // Load history from local storage
+        const localHistory = JSON.parse(localStorage.getItem(`${userName}-history`)) || [];
+    
+        // Merge server and local history, prioritizing server data
+        const mergedHistory = [...serverHistory, ...localHistory].reduce((acc, curr) => {
+          if (typeof curr === 'object' && curr !== null && curr.date && curr.scores) {
+            const existingEntry = acc.find(entry => entry.date === curr.date);
+            if (!existingEntry) {
+              acc.push(curr);
+            }
+          } else {
+            console.warn('Invalid history entry:', curr);
+          }
+          return acc;
+        }, []);
+    
+        // Sort history by date
+        mergedHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+        setExerciseHistory(mergedHistory);
+        localStorage.setItem(`${userName}-history`, JSON.stringify(mergedHistory));
+    
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching exercises:', err);
-        setError('Failed to fetch exercises');
+        console.error('Error fetching data:', err);
+        setError(`Failed to fetch data: ${err.message}`);
         setLoading(false);
       }
     };
 
-    fetchExercises();
-  }, []); // Empty dependency array ensures it only runs once
+  fetchData();
+}, [userName]);
 
   // Load scores and exercise history from local storage for the user
   useEffect(() => {
     const storedScores = JSON.parse(localStorage.getItem(userName)) || {};
+    console.log('Loaded scores from local storage:', storedScores);
     setScores(storedScores);
     const history = JSON.parse(localStorage.getItem(`${userName}-history`)) || [];
+    console.log('Loaded history from local storage:', history);
     setExerciseHistory(history);
   }, [userName]);
 
@@ -64,16 +118,19 @@ function Exercises({ userName }) {
         throw new Error('No authentication token found');
       }
   
-      console.log('Submitting scores for user:', userName);
-      console.log('Scores to submit:', scores);
-  
+      const currentDate = new Date().toISOString();
+      
+      // Convert scores object to array format
       const scoresArray = Object.entries(scores).map(([id, score]) => ({
         id: Number(id),
         score1: score.score1,
         score2: score.score2,
       }));
   
-      console.log('Formatted scores array:', scoresArray);
+      const newEntry = {
+        date: currentDate,
+        scores: scoresArray
+      };
   
       const response = await fetch(`http://localhost:5000/api/schedule/${userName}`, {
         method: 'PUT',
@@ -82,28 +139,29 @@ function Exercises({ userName }) {
           'Authorization': `Bearer ${token}`
         },
         credentials: 'include',
-        body: JSON.stringify({ scores: scoresArray }),
+        body: JSON.stringify(newEntry),
       });
   
-      console.log('Response status:', response.status);
-      const responseData = await response.json();
-      console.log('Response data:', responseData);
-  
       if (!response.ok) {
+        const responseData = await response.json();
         throw new Error(`Failed to update schedule: ${responseData.message || 'Unknown error'}`);
       }
   
-      console.log('Schedule updated successfully:', responseData);
-
+      const responseData = await response.json();
+      console.log('Server response:', responseData);
+  
+      // Update local state
+      setExerciseHistory(prevHistory => {
+        const updatedHistory = [...prevHistory, newEntry];
+        updatedHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+        return updatedHistory;
+      });
+  
       // Update local storage
-      localStorage.setItem(userName, JSON.stringify(scores));
-      const history = JSON.parse(localStorage.getItem(`${userName}-history`)) || [];
-      history.push({ date: new Date(), scores });
-      localStorage.setItem(`${userName}-history`, JSON.stringify(history));
-
-      // Update state
-      setExerciseHistory(history);
-
+      const updatedHistory = [...exerciseHistory, newEntry].sort((a, b) => new Date(b.date) - new Date(a.date));
+      localStorage.setItem(`${userName}-history`, JSON.stringify(updatedHistory));
+  
+      setScores({}); // Clear the form after successful submission
       alert('Scores submitted successfully!');
     } catch (error) {
       console.error('Detailed error:', error);

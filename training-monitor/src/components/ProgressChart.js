@@ -32,9 +32,11 @@ const ProgressChart = ({ history, exercises }) => {
     const scores = {};
     const exerciseId = selectedExercise; // Get the currently selected exercise ID
 
+    const exerciseScores = entry.scores && entry.scores[exerciseId] ? entry.scores[exerciseId] : {};
+
     // Get the scores for the selected exercise
-    scores[`${exerciseId}-score1`] = entry.scores[exerciseId]?.score1 || null;
-    scores[`${exerciseId}-score2`] = entry.scores[exerciseId]?.score2 || null;
+    scores[`${exerciseId}-score1`] = exerciseScores.score1 || null;
+    scores[`${exerciseId}-score2`] = exerciseScores.score2 || null;
     return { date: entry.date, ...scores };
   });
 
