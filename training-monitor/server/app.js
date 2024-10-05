@@ -8,13 +8,13 @@ const app = express();
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-const REACT_APP_API_URL= 'https://rkomi98.github.io/TrainingApp/'//'https://rkomi98.github.io/TrainingApp/' //'http://192.168.1.107:3000',//'http://localhost:3000',  // Frontend domain
+const REACT_APP_API_URL= 'https://rkomi98.github.io'//'https://rkomi98.github.io/TrainingApp/' //'http://192.168.1.107:3000',//'http://localhost:3000',  // Frontend domain
 
 // Middleware
 app.use(express.json()); // for parsing application/json
 app.use(cors({
   origin: REACT_APP_API_URL, 
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],  // Allowed methods
+  methods: ['GET', 'POST', 'PUT', 'DELETE','OPTIONS'],  // Allowed methods
   credentials: true,  // If your requests include cookies or HTTP authentication
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
