@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const Register = () => {
+const Register = ({ onRegister, onToggle }) => {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('player'); // Default role
   const [errorMessage, setErrorMessage] = useState(''); // State to hold error messages
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Use React Router's navigation
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -17,8 +17,9 @@ const Register = () => {
         password,
         role,
       });
-      alert(response.data); // Show success message
-      navigate('/login');
+      alert(response.data);
+      onRegister(name); // Handle successful registration in App.js
+      navigate('/'); // Navigate back to login after registration
     } catch (error) {
       // Display the error message returned from the backend
       const message = error.response?.data || 'An error occurred. Please try again.';
@@ -60,9 +61,9 @@ const Register = () => {
         {errorMessage && <p className="error-message">{errorMessage}</p>} {/* Show error message if exists */}
         <button type="submit">Register</button>
       </form>
-      <button className="back-to-login" onClick={() => navigate('/login')}>
+      <button className="back-to-login" onClick={onToggle}>
         Go Back to Login
-      </button> {/* Go back to login */}
+      </button> {/* Use onToggle to switch back to login */}
     </div>
   );
 };
