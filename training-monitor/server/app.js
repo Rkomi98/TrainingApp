@@ -7,7 +7,6 @@ const Schedule = require('./models/Schedule');  // Make sure this path is correc
 const app = express();
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-const jwl= 'JKwQrVZEoEEM5sul'
 
 const REACT_APP_API_URL= 'http://localhost:3000' //'https://rkomi98.github.io/TrainingApp/'//'https://rkomi98.github.io/TrainingApp/' //'http://192.168.1.107:3000',//'http://localhost:3000',  // Frontend domain
 
@@ -42,7 +41,7 @@ function authenticateJWT(req, res, next) {
   }
 
   const bearerToken = token.split(' ')[1];  // Extract the token part (Bearer TOKEN)
-  jwt.verify(bearerToken, jwl, (err, user) => {
+  jwt.verify(bearerToken, process.env.JWT_SECRET, (err, user) => {
       if (err) {
           return res.sendStatus(403);  // Invalid token, deny access
       }

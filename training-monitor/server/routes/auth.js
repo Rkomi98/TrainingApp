@@ -5,8 +5,6 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 require('dotenv').config(); // Add this line
 
-const jwl= 'JKwQrVZEoEEM5sul'
-
 // Register endpoint
 router.post('/register', async (req, res) => {
     const { username, password, role } = req.body;
@@ -45,7 +43,7 @@ router.post('/login', async (req, res) => {
     return res.status(400).json({ message: 'Invalid credentials' });
   }
 
-  const token = jwt.sign({ id: user._id, username: user.username, role: user.role }, jwl, { expiresIn: '1h' });
+  const token = jwt.sign({ id: user._id, username: user.username, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
   res.json({ token });
 });
 
