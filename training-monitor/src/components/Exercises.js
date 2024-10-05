@@ -21,7 +21,7 @@ function Exercises({ userName }) {
         }
     
         // Fetch exercises
-        const exercisesResponse = await fetch('http://localhost:5000/api/exercises', {
+        const exercisesResponse = await fetch('https://trainingapp-cn47.onrender.com/api/exercises', {
           headers: { 
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -35,7 +35,7 @@ function Exercises({ userName }) {
         setExercises(exercisesData);
     
         // Fetch history from server
-        const historyResponse = await fetch(`http://localhost:5000/api/schedule/${userName}`, {
+        const historyResponse = await fetch(`https://trainingapp-cn47.onrender.com/api/schedule/${userName}`, {
           headers: { 
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -132,7 +132,7 @@ function Exercises({ userName }) {
         scores: scoresArray
       };
   
-      const response = await fetch(`http://localhost:5000/api/schedule/${userName}`, {
+      const response = await fetch(`https://trainingapp-cn47.onrender.com/api/schedule/${userName}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
