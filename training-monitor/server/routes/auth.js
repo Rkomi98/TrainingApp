@@ -43,8 +43,32 @@ router.post('/login', async (req, res) => {
     return res.status(400).json({ message: 'Invalid credentials' });
   }
 
-  const token = jwt.sign({ id: user._id, username: user.username, role: user.role }, process.env.JWT_SECRET, { expiresIn: '12h' });
+  const token = jwt.sign(
+    { id: user._id, username: user.username, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: '7h' } // Changed to 7 hours
+  );
   res.json({ token });
+});
+
+router.post('/refresh', async (req, res) => {
+  const { token } = req.body;
+
+  if (!token) {
+    return res.status(400).json({ message: 'Token is required' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const newToken = jwt.sign(
+      { id: decoded.id, username: decoded.username, role: decoded.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '12h' } // Changed to 12 hours
+    );
+    res.json({ token: newToken });
+  } catch (error) {
+    res.status(401).json({ message: 'Invalid token' });
+  }
 });
 
 module.exports = router;

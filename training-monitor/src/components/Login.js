@@ -15,8 +15,9 @@ const Login = ({ onLogin, onToggle }) => {
       });
       // Save the token to local storage (or handle it as needed)
       localStorage.setItem('token', response.data.token);
+      const { token } = response.data;
       alert('Login successful!');
-      onLogin(name); // Call the login handler passed from App.js
+      onLogin(name, token); // Pass both name and token to the handler
     } catch (error) {
       const message = error.response?.data.message || 'An error occurred. Please try again.';
       setErrorMessage(message);

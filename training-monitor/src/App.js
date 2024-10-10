@@ -1,15 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Exercises from './components/Exercises';
 import Login from './components/Login';
-import Register from './components/Register'; // Add Register component
+import Register from './components/Register';
+import { initializeAuth, setAuthToken } from './auth'; // Import auth functions
 import './App.css';
 
 function App() {
   const [userName, setUserName] = useState('');
-  const [isRegistered, setIsRegistered] = useState(true); // To toggle between login and register
+  const [isRegistered, setIsRegistered] = useState(true);
 
-  const handleLogin = (name) => {
+  useEffect(() => {
+    // Initialize auth and check for existing token
+    initializeAuth();
+    const token = localStorage.getItem('token');
+    if (token) {
+      // Decode the token to get the username
+      const decodedToken = JSON.parse(atob(token.split('.')[1]));
+      setUserName(decodedToken.username);
+    }
+  }, []);
+
+  const handleLogin = (name, token) => {
     setUserName(name);
+    setAuthToken(token);
   };
 
   const toggleRegister = () => {
