@@ -1,25 +1,45 @@
 // src/Timer.js
 import React, { useEffect, useState } from 'react';
 
+// Import the sound file for alerts
+import alertSound from './alert.mp3'; // Ensure to place your sound file in the correct location
+
 const Timer = () => {
-  const [time, setTime] = useState(0);
+  const [time, setTime] = useState(30); // Start from 30 seconds
   const [isRunning, setIsRunning] = useState(false);
+  const audioRef = React.useRef(new Audio(alertSound)); // Create audio reference
 
   useEffect(() => {
     let timerId;
+    
     if (isRunning) {
       timerId = setInterval(() => {
-        setTime(prevTime => prevTime + 1);
+        setTime(prevTime => {
+          if (prevTime > 0) {
+            return prevTime - 1; // Decrement time
+          } else {
+            clearInterval(timerId); // Stop the timer when it reaches 0
+            return 0;
+          }
+        });
       }, 1000);
     }
+
     return () => clearInterval(timerId);
   }, [isRunning]);
+
+  useEffect(() => {
+    // Play sound alerts at specified times
+    if (time === 10 || time === 3 || time === 2 || time === 1) {
+      audioRef.current.play().catch(error => console.error("Audio play error:", error));
+    }
+  }, [time]); // Runs every time `time` changes
 
   const handleStart = () => setIsRunning(true);
   const handlePause = () => setIsRunning(false);
   const handleStop = () => {
     setIsRunning(false);
-    setTime(0);
+    setTime(30); // Reset to 30 seconds
   };
 
   const formatTime = (seconds) => {
