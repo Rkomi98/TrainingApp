@@ -10,10 +10,22 @@
 body {
   margin: 0;
   font-family: 'Arial', sans-serif;
-  background-color: #f0f4f8;
+  background: linear-gradient(135deg, #74ebd5, #acb6e5);
   display: flex;
   justify-content: center;
   align-items: center;
+  min-height: 100vh; /* Ensures it takes up the full viewport height */
+}
+
+form {
+  width: 100%;
+  max-width: 400px;
+  background: white;
+  padding: 20px;
+  margin: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow-y: auto; /* Enables scrolling within the form */
 }
 
 /* Main Container */
@@ -214,6 +226,7 @@ button:hover {
   font-size: 2em; /* Larger font size */
   color: white; /* White text */
   position: relative;
+  max-width: 90%; /* Responsive width */
 }
 
 .timer::before {
@@ -252,10 +265,20 @@ button:hover {
 }
 
 /* Table Styles */
+.table-container {
+  width: 100%; /* Ensure the container takes up full width */
+  overflow-x: auto; /* Allow horizontal scrolling when content overflows */
+  margin: 10px 0;
+}
 table {
   width: 100%;
+  max-width: 100%;
+  margin: 10px 0;
   border-collapse: collapse; /* Merge borders */
   margin-bottom: 20px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 th,
@@ -277,14 +300,16 @@ tbody tr:hover {
 /* Input Fields */
 input[type="number"] {
   width: 100%; /* Full width */
-  padding: 8px;
-  border: 1px solid #ccc; /* Light gray border */
-  border-radius: 4px;
-  transition: border 0.2s;
+  padding: 10px;
+  border: 2px solid #ccc; /* Light gray border */
+  border-radius: 8px;
+  transition: border 0.3s, box-shadow 0.3s;
+  box-sizing: border-box;
 }
 
 input[type="number"]:focus {
   border: 1px solid #3498db; /* Highlight border on focus */
+  box-shadow: 0 0 10px rgba(52, 152, 219, 0.2);
   outline: none; /* Remove outline */
 }
 
@@ -296,6 +321,7 @@ button {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  box-sizing: border-box;
   transition: background 0.2s, transform 0.2s;
 }
 
@@ -309,21 +335,57 @@ button:hover {
   margin-top: 20px;
   padding: 10px;
   background: #ecf0f1; /* Light background for chart */
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px; /* Keeps it responsive */
 }
 
 /* Responsive Design */
 @media (max-width: 600px) {
-  .container {
-    padding: 15px; /* Less padding on small screens */
+  body {
+    padding: 10px;
   }
 
-  h2 {
-    font-size: 1.5em; /* Smaller header */
+  h1 {
+    font-size: 1.8rem;
+  }
+
+  table {
+    font-size: 0.9rem;
+    max-width: 100%;
+  }
+
+  th, td {
+    padding: 8px;
+    font-size: 0.85rem;
+  }
+
+  form {
+    margin: 0 auto;
+    padding: 15px;
+    height: 100%;
+    box-shadow: none;
+    border-radius: 0;
+    overflow-y: scroll; /* Enables scrolling on mobile */
+  }
+
+  input, button {
+    font-size: 1rem;
+    padding: 10px;
+  }
+
+  .chart-container {
+    padding: 8px;
+    width: 90%; /* Fits within smaller screens */
   }
 
   .timer {
     font-size: 1.5em; /* Smaller font size for timer on mobile */
+    padding: 12px;
   }
+  .app-header h1 {
+    font-size: 1.5rem;
+  }
+
 }
