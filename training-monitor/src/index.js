@@ -4,9 +4,11 @@ import { BrowserRouter } from 'react-router-dom'; // Import BrowserRouter
 import App from './App';
 import './index.css';
 
+const basename = new URL(process.env.PUBLIC_URL || window.location.origin).pathname;
+
 ReactDOM.render(
   <React.StrictMode>
-    <BrowserRouter> {/* Wrap the App in BrowserRouter */}
+    <BrowserRouter basename={basename}> {/* Wrap the App in BrowserRouter */}
       <App />
     </BrowserRouter>
   </React.StrictMode>,
