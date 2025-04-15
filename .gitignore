@@ -14,7 +14,6 @@ training-monitor/server/node_modules/
 /client/package-lock.json
 /client/npm-debug.log
 # Environment Variables
-.env
 .env.local
 .env.development.local
 .env.test.local
