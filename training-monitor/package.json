@@ -2,7 +2,7 @@
   "name": "training-monitor",
   "version": "0.7.0",
   "private": true,
-  "homepage": "https://rkomi98.github.io/TrainingApp/",
+  "homepage": "https://rkomi98.github.io/TrainingApp",
   "dependencies": {
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
