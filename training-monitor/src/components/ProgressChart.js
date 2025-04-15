@@ -1,110 +1,244 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Import useEffect
 import {
   LineChart,
   Line,
   XAxis,
   YAxis,
+  CartesianGrid, // Added for better readability
   Tooltip,
   Legend,
   ResponsiveContainer,
-  LabelList,
+  // LabelList, // Removing LabelList for now to simplify, can be added back if needed
 } from 'recharts';
 
-const ProgressChart = ({ history, exercises }) => {
-  // Create exerciseMap without using Object.fromEntries
-  const exerciseMap = {};
-  
-  if (exercises && Object.keys(exercises).length > 0) {
-    Object.keys(exercises).forEach((id) => {
-      exerciseMap[id] = exercises[id].name;
+// Helper to format date ticks on X-axis
+const formatDateTick = (isoDateString) => {
+  try {
+    return new Date(isoDateString).toLocaleDateString('en-US', { // Or your preferred locale
+      month: 'short',
+      day: 'numeric',
     });
+  } catch (e) {
+    return isoDateString; // Fallback
   }
+};
 
-  const [selectedExercise, setSelectedExercise] = useState(Object.keys(exerciseMap)[0] || null); // Default to the first exercise or null
+const ProgressChart = ({ history, exercises }) => {
+  // --- State for Selected Exercise ---
+  const [selectedExerciseId, setSelectedExerciseId] = useState(null); // Store the ID
 
-  // Check if exercises data is available
-  if (!exercises || Object.keys(exerciseMap).length === 0) {
-    return <div>No data pigrone</div>;
-  }
+  // --- Create Exercise Map for Dropdown ---
+  // This needs to run whenever 'exercises' prop changes
+  const exerciseMap = React.useMemo(() => {
+      const map = {};
+      if (Array.isArray(exercises)) {
+        exercises.forEach(exercise => {
+          if (exercise && exercise.id && exercise.name) {
+            map[exercise.id] = exercise.name;
+          }
+        });
+      }
+      return map;
+  }, [exercises]); // Recalculate only when exercises array changes
 
-  // Prepare chart data filtered by selected exercise
-  const chartData = history.map(entry => {
-    const scores = {};
-    const exerciseId = selectedExercise; // Get the currently selected exercise ID
+  // --- Effect to Set Initial/Default Selected Exercise ---
+  useEffect(() => {
+      // Find the first valid ID from the map
+      const firstValidId = Object.keys(exerciseMap)[0] || null;
+      // Set the initial selection, or if the current selection becomes invalid
+      if (firstValidId && (!selectedExerciseId || !exerciseMap[selectedExerciseId])) {
+          setSelectedExerciseId(firstValidId);
+      }
+      // If the map becomes empty and an exercise was selected, clear selection
+      else if (!firstValidId && selectedExerciseId){
+          setSelectedExerciseId(null);
+      }
+  }, [exerciseMap, selectedExerciseId]); // Re-run when map changes or selection exists
 
-    const exerciseScores = entry.scores && entry.scores[exerciseId] ? entry.scores[exerciseId] : {};
 
-    // Get the scores for the selected exercise
-    scores[`${exerciseId}-score1`] = exerciseScores.score1 || null;
-    scores[`${exerciseId}-score2`] = exerciseScores.score2 || null;
-    return { date: entry.date, ...scores };
-  });
-
-  // Function to create labels for the end of each curve
-  const renderCustomLabel = (exerciseName, scoreType) => ({ index, x, y }) => {
-    const lastIndex = chartData.length - 1;
-    if (index === lastIndex) {
-      return (
-        <text x={x + 5} y={y} fill="#000" fontSize={12} textAnchor="start">
-          {`${exerciseName} - ${scoreType}`}
-        </text>
-      );
+  // --- Prepare Data for the Chart ---
+  // This depends on history and the selectedExerciseId
+  const chartData = React.useMemo(() => {
+    if (!selectedExerciseId || !Array.isArray(history)) {
+      return []; // Return empty if no selection or history
     }
-    return null;
-  };
 
-  // Calculate the maximum value to set y-axis limits
-  const maxValue = Math.max(...chartData.flatMap(entry => Object.values(entry).slice(1))); // Skip the date field
-  const yMax = maxValue + 0.5;
+    // Filter history to include only entries relevant to the selected exercise
+    // and transform into the format recharts needs: { date: ..., score1: ..., score2: ... }
+    return history
+      .map(dailyEntry => {
+          // Find the specific exercise's scores within the daily entry
+          let score1 = null;
+          let score2 = null;
+          if (dailyEntry && dailyEntry.date && Array.isArray(dailyEntry.exercises)) {
+              const exerciseData = dailyEntry.exercises.find(ex => ex && ex.id?.toString() === selectedExerciseId.toString());
+              if (exerciseData) {
+                  score1 = typeof exerciseData.score1 === 'number' ? exerciseData.score1 : null;
+                  score2 = typeof exerciseData.score2 === 'number' ? exerciseData.score2 : null;
+              }
+              // Return object only if scores were found for this day? Or always return date?
+              // Let's always return the date object, scores might be null
+              return {
+                  date: dailyEntry.date, // Keep original date (ISO string assumed)
+                  score1: score1,
+                  score2: score2,
+              };
+          }
+          return null; // Ignore invalid daily entries
+      })
+      .filter(entry => entry !== null) // Remove ignored entries
+      // Sort by date ascending (recharts usually expects this)
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  }, [history, selectedExerciseId]); // Recalculate when history or selection changes
+
+  // --- Calculate Y-Axis Domain ---
+  const yAxisDomain = React.useMemo(() => {
+      if (chartData.length === 0) {
+          return [0, 1]; // Default domain if no data
+      }
+      // Find max score1 and score2 from the prepared chartData
+      const scores = chartData.flatMap(d => [d.score1, d.score2])
+                              .filter(s => typeof s === 'number'); // Only numeric scores
+
+      const maxValue = scores.length > 0 ? Math.max(...scores) : 0;
+      const yMax = Math.ceil(maxValue) + 1; // Use ceiling and add 1
+
+      return [0, yMax]; // Domain starts at 0
+
+  }, [chartData]); // Recalculate when chartData changes
+
+
+  // --- Render Logic ---
+
+  // Handle cases where data is not ready
+  if (!Array.isArray(exercises) || exercises.length === 0) {
+    return <div>Loading exercises list...</div>; // Or No exercises defined
+  }
+  if (Object.keys(exerciseMap).length === 0) {
+    return <div>Processing exercises...</div>; // Should be brief
+  }
+   if (!selectedExerciseId) {
+     return <div>Please select an exercise.</div>; // Handle no selection state
+   }
+
 
   return (
-    <div>
-      <h3>Select an Exercise</h3>
+    <div style={styles.container}>
+      <h3 style={styles.heading}>Select an Exercise</h3>
       <select
-        value={selectedExercise}
-        onChange={(e) => setSelectedExercise(Number(e.target.value))}
+        value={selectedExerciseId} // Use the ID for the value
+        // Ensure onChange updates with the ID (which should be a string from option value)
+        onChange={(e) => setSelectedExerciseId(e.target.value)}
+        style={styles.dropdown}
       >
-        {Object.keys(exerciseMap).map((id) => (
+        {/* Default unselected option? */}
+        {/* <option value="" disabled>-- Select --</option> */}
+        {Object.entries(exerciseMap).map(([id, name]) => (
           <option key={id} value={id}>
-            {exerciseMap[id]}
+            {name}
           </option>
         ))}
       </select>
 
-      <ResponsiveContainer width="100%" height={400}>
-        <LineChart data={chartData}>
-          <XAxis dataKey="date" />
-          <YAxis domain={[0, yMax]} />
-          <Tooltip />
-          <Legend
-            formatter={(value) => {
-              const [exerciseId, scoreType] = value.split('-');
-              const exerciseName = exerciseMap[exerciseId];
-              return `${exerciseName} - ${scoreType.replace('score', 'Score ')}`;
-            }}
-          />
+      {/* Only render chart if there's data */}
+      {chartData.length > 0 ? (
+        <div style={styles.chartWrapper}>
+          <ResponsiveContainer width="100%" height={300}>
+            {/* Add key to LineChart if data changes drastically might help re-render */}
+            <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 25 }}>
+              {/* Add Cartesian Grid */}
+              <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
 
-          {/* Lines for selected exercise scores */}
-          <Line
-            type="monotone"
-            dataKey={`${selectedExercise}-score1`}
-            stroke="#8884d8"
-            activeDot={{ r: 8 }}
-          >
-            <LabelList dataKey={`${selectedExercise}-score1`} content={renderCustomLabel(exerciseMap[selectedExercise], 'Score 1')} />
-          </Line>
-          <Line
-            type="monotone"
-            dataKey={`${selectedExercise}-score2`}
-            stroke="#82ca9d"
-            activeDot={{ r: 8 }}
-          >
-            <LabelList dataKey={`${selectedExercise}-score2`} content={renderCustomLabel(exerciseMap[selectedExercise], 'Score 2')} />
-          </Line>
-        </LineChart>
-      </ResponsiveContainer>
+              {/* X Axis Configuration */}
+              <XAxis
+                dataKey="date"
+                tickFormatter={formatDateTick} // Format ticks
+                angle={-45} // Angle ticks if they overlap
+                textAnchor="end" // Adjust anchor for angled ticks
+                height={60} // Increase bottom margin if needed for angled labels
+                interval="preserveStartEnd" // Try to show first/last, let recharts skip others
+                // Or force all ticks (can cause overlap): interval={0}
+              />
+
+              {/* Y Axis Configuration */}
+              <YAxis
+                domain={yAxisDomain} // Apply calculated domain [0, max+1]
+                allowDecimals={false} // No decimals on axis if scores are integers
+                width={40} // Adjust left margin if needed
+              />
+
+              {/* Tooltip */}
+              <Tooltip
+                labelFormatter={formatDateTick} // Format date in tooltip label
+                formatter={(value, name) => { // Format score values in tooltip
+                    const scoreType = name === 'score1' ? 'Score 1' : 'Score 2';
+                    return [value, scoreType];
+                }}
+              />
+
+              {/* Legend */}
+              <Legend formatter={(value) => (value === 'score1' ? 'Score 1' : 'Score 2')} />
+
+              {/* Lines - use simple dataKeys */}
+              <Line
+                type="monotone"
+                dataKey="score1" // Use the direct key from chartData
+                stroke="#8884d8" // Blue/Purple
+                strokeWidth={2}
+                activeDot={{ r: 6 }}
+                connectNulls={true} // Connect line over null data points
+              />
+              <Line
+                type="monotone"
+                dataKey="score2" // Use the direct key from chartData
+                stroke="#82ca9d" // Green
+                strokeWidth={2}
+                activeDot={{ r: 6 }}
+                connectNulls={true} // Connect line over null data points
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      ) : (
+        // Message if an exercise is selected but has no history data
+        <p>No history data found for "{exerciseMap[selectedExerciseId]}".</p>
+      )}
     </div>
   );
+};
+
+// --- Styles (Keep as is) ---
+const styles = {
+  container: {
+    padding: '10px',
+    backgroundColor: '#f7f9fc',
+    borderRadius: '10px',
+    boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+    marginTop: '20px', // Add some space above the chart
+  },
+  heading: {
+    textAlign: 'center',
+    fontSize: '1.2em',
+    color: '#333',
+    marginBottom: '10px',
+  },
+  dropdown: {
+    display: 'block', // Make dropdown block level for centering/width
+    width: '80%', // Adjust width as needed
+    maxWidth: '400px', // Max width
+    margin: '0 auto 15px auto', // Center the dropdown
+    padding: '10px',
+    border: '1px solid #ccc',
+    borderRadius: '5px',
+    fontSize: '1em',
+    backgroundColor: 'white',
+  },
+  chartWrapper: {
+    width: '100%',
+    overflowX: 'auto', // Allow horizontal scroll if needed on small screens
+    padding: '10px 0', // Add padding top/bottom
+  },
 };
 
 export default ProgressChart;

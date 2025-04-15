@@ -1,29 +1,52 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+// Removed useNavigate as it wasn't being used effectively here; App.js handles the view change
+// import { useNavigate } from 'react-router-dom';
+
+// Define the API base URL using the environment variable
+const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 const Register = ({ onRegister, onToggle }) => {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('player'); // Default role
-  const [errorMessage, setErrorMessage] = useState(''); // State to hold error messages
-  const navigate = useNavigate(); // Use React Router's navigation
+  const [role, setRole] = useState('player');
+  const [errorMessage, setErrorMessage] = useState('');
+  // const navigate = useNavigate(); // Removed
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setErrorMessage(''); // Clear previous error
     try {
-      const response = await axios.post('https://trainingapp-cn47.onrender.com/api/auth/register', {
+      // Use the API_BASE_URL variable to construct the full endpoint
+      const response = await axios.post(`${API_BASE_URL}/auth/register`, {
         username: name,
         password,
         role,
       });
-      alert(response.data);
-      onRegister(name); // Handle successful registration in App.js
-      navigate('/'); // Navigate back to login after registration
+
+      // Assuming response.data is a success message string like "User registered successfully"
+      alert(response.data.message || "Registration successful!"); // Use message field if exists
+
+      // Option 1: Automatically log the user in (if backend returns token on register)
+      // if (response.data.token) {
+      //   onRegister(name, response.data.token); // Pass name and token
+      // } else {
+      //   // Option 2: Just toggle back to login view
+      //   onToggle();
+      // }
+
+      // Simplest: Just toggle back to login after successful registration
+      onToggle(); // Call onToggle to switch the view in App.js back to Login
+
+
     } catch (error) {
-      // Display the error message returned from the backend
-      const message = error.response?.data || 'An error occurred. Please try again.';
-      setErrorMessage(message); // Set error message state
+      // Improved error handling
+      console.error("Registration error:", error);
+      const message = error.response?.data?.message || // Check nested message property
+                      error.response?.data || // Check if data itself is the message string
+                      error.message || // Axios error message
+                     'An error occurred during registration. Please try again.';
+      setErrorMessage(message);
     }
   };
 
@@ -37,8 +60,9 @@ const Register = ({ onRegister, onToggle }) => {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Enter your username"
+            placeholder="Choose a username"
             required
+            autoComplete="username"
           />
         </label>
         <label>
@@ -47,8 +71,9 @@ const Register = ({ onRegister, onToggle }) => {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter your password"
+            placeholder="Create a password"
             required
+            autoComplete="new-password"
           />
         </label>
         <label>
@@ -58,12 +83,15 @@ const Register = ({ onRegister, onToggle }) => {
             <option value="coach">Coach</option>
           </select>
         </label>
-        {errorMessage && <p className="error-message">{errorMessage}</p>} {/* Show error message if exists */}
+        {errorMessage && <p className="error-message">{errorMessage}</p>}
         <button type="submit">Register</button>
       </form>
-      <button className="back-to-login" onClick={onToggle}>
-        Go Back to Login
-      </button> {/* Use onToggle to switch back to login */}
+      <p>
+        Already have an account?{' '}
+        <button type="button" className="link-button" onClick={onToggle}>
+          Login here
+        </button>
+      </p>
     </div>
   );
 };

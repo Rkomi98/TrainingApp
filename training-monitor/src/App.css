@@ -266,35 +266,94 @@ button:hover {
 
 /* Table Styles */
 .table-container {
-  width: 100%; /* Ensure the container takes up full width */
-  overflow-x: auto; /* Allow horizontal scrolling when content overflows */
-  margin: 10px 0;
-}
-table {
-  width: 100%;
-  max-width: 100%;
-  margin: 10px 0;
-  border-collapse: collapse; /* Merge borders */
-  margin-bottom: 20px;
-  background: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow-x: auto; /* IMPORTANT: Enables horizontal scrolling */
+  max-width: 100%; /* Prevents container from breaking page layout */
+  margin: 20px 0; /* Your preferred margin */
+  border-radius: 10px; /* Apply radius to the container */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Apply shadow to the container */
+  /* Optional: Add a border to the container if you remove it from the table */
+  /* border: 1px solid #ddd; */
+  background: #ffffff; /* Move background to container if table border-radius is desired */
 }
 
-th,
-td {
+.table-container table {
+  width: 100%; /* Table tries to fill container */
+  /* min-width: 600px; */ /* Optional: Force scrolling sooner */
+  border-collapse: collapse;
+  /* Remove background/radius/shadow from table itself if applied to container */
+  /* background: none; */
+  /* border-radius: 0; */
+  /* box-shadow: none; */
+  border-spacing: 0; /* Better than border-collapse for sticky headers sometimes */
+}
+
+.table-container th,
+.table-container td {
   padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #ddd; /* Light gray border for rows */
+  text-align: center; /* Center scores */
+  border-bottom: 1px solid #ddd;
+  border-left: 1px solid #ddd; /* Add left border for vertical lines */
+  white-space: nowrap; /* Prevent content wrapping */
+  min-width: 120px; /* Give columns some minimum width */
+}
+.table-container th:first-child, /* First header cell */
+.table-container td:first-child { /* First data cell in each row */
+  border-left: none; /* No left border for the very first column */
 }
 
-th {
-  background: #3498db; /* Blue header */
+
+/* --- Header Styling --- */
+.table-container thead th {
+  background: #3498db; /* Your blue header */
   color: white;
+  text-align: center; /* Center header text */
+  /* --- Sticky Header Row --- */
+  position: sticky;
+  top: 0;
+  z-index: 2; /* Above scrolling content and sticky column */
+  /* Add a border to ensure separation if needed */
+  border-bottom: 2px solid #2980b9; /* Darker bottom border for header */
 }
 
-tbody tr:hover {
-  background-color: #f1f1f1; /* Highlight on hover */
+/* --- Body Styling --- */
+.table-container tbody tr:hover {
+  background-color: #f1f1f1; /* Your highlight on hover */
+}
+
+/* --- Sticky First Column --- */
+.table-container th:first-child, /* Exercise header cell */
+.table-container td:first-child { /* Exercise name cells */
+  text-align: left; /* Align exercise names to the left */
+  /* --- Sticky --- */
+  position: sticky;
+  left: 0;
+  z-index: 1; /* Above scrolling cells but below sticky header */
+  /* --- Appearance --- */
+  background: #ffffff; /* Match container/table background */
+  border-right: 2px solid #ccc; /* Add a distinct border */
+  min-width: 150px; /* Give more space for exercise names */
+}
+
+/* Ensure hover applies correctly WITH sticky column background */
+.table-container tbody tr:hover td:first-child {
+    background-color: #f1f1f1; /* Match hover color */
+}
+
+
+/* --- Sticky Top-Left Corner --- */
+.table-container thead th:first-child {
+  position: sticky; /* Already sticky from header/column rules, but be explicit */
+  top: 0; /* Stick to top */
+  left: 0; /* Stick to left */
+  z-index: 3; /* Highest z-index: Above header row AND first column */
+  background: #3498db; /* Match header background */
+  border-right: 2px solid #ccc; /* Match sticky column border */
+   border-bottom: 2px solid #2980b9; /* Match sticky header border */
+}
+
+/* Remove bottom border from last row for cleaner look inside container */
+.table-container tbody tr:last-child td {
+    border-bottom: none;
 }
 
 /* Input Fields */

@@ -1,6 +1,7 @@
 
 /node_modules
 /node_modules/.bin
+training-monitor/server/node_modules/
 # Node.js / Express.js
 /node_modules
 /package-lock.json
