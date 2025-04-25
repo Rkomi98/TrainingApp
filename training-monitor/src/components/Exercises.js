@@ -430,12 +430,34 @@ function Exercises({ userName }) {
             <Timer />
 
             {/* Sync Section */}
-            <div style={{ margin: '15px 0', padding: '10px', border: '1px solid #eee', borderRadius: '5px', backgroundColor: '#f9f9f9' }}>
+            <div style={{ 
+                    margin: '15px 0', 
+                    padding: '10px', 
+                    border: '1px solid #eee', 
+                    borderRadius: '5px', 
+                    backgroundColor: '#f9f9f9',
+                    display: 'flex',          // Add this to enable flexbox
+                    justifyContent: 'center', // Add this to center horizontally
+                    alignItems: 'center',     // This centers vertically
+                    flexDirection: 'column'   // Stack children vertically
+                }}>
                 <button
                     onClick={handleSyncCache}
                     disabled={isSyncing || unsyncedEntries.length === 0}
                     title={unsyncedEntries.length > 0 ? `Sync ${unsyncedEntries.length} unsaved entries from old local cache` : "No entries found in old cache to sync"}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: (isSyncing || unsyncedEntries.length === 0) ? 'not-allowed' : 'pointer', padding: '8px 12px', border: '1px solid #ccc', borderRadius: '4px', backgroundColor: (isSyncing || unsyncedEntries.length === 0) ? '#eee' : 'white' }}
+                    style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center', // Center the content inside the button
+                        gap: '8px',
+                        cursor: (isSyncing || unsyncedEntries.length === 0) ? 'not-allowed' : 'pointer',
+                        padding: '8px 12px',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        backgroundColor: (isSyncing || unsyncedEntries.length === 0) ? '#eee' : 'white',
+                        color: '#333',
+                        width: 'fit-content',    // Make sure button only takes needed width
+                    }}
                 >
                     <FiRefreshCw style={{ verticalAlign: 'middle' }} />
                     {isSyncing ? 'Syncing...' : `Sync Cache (${unsyncedEntries.length})`}
